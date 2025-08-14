@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛博时间线 | Cyber Timeline</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0a0a12;
+            --bg-darker: #050508;
+            --neon-blue: #00f3ff;
+            --neon-purple: #bd00ff;
+            --neon-pink: #ff00c8;
+            --text-primary: #e0e0ff;
+            --text-secondary: #a0a0c0;
+            --card-bg: rgba(15, 15, 30, 0.7);
+            --glow-blue: 0 0 10px rgba(0, 243, 255, 0.7);
+            --glow-purple: 0 0 10px rgba(189, 0, 255, 0.7);
+            --glow-pink: 0 0 10px rgba(255, 0, 200, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto Mono', monospace;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(189, 0, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 243, 255, 0.1) 0%, transparent 20%),
+                linear-gradient(to bottom, var(--bg-darker), var(--bg-dark));
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 网格背景 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 头部样式 */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+            color: var(--neon-blue);
+            text-shadow: var(--glow-blue);
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .admin-btn {
+            background: rgba(189, 0, 255, 0.2);
+            color: var(--neon-purple);
+            border: 1px solid var(--neon-purple);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-shadow: var(--glow-purple);
+            box-shadow: var(--glow-purple);
+        }
+
+        .admin-btn:hover {
+            background: rgba(189, 0, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* 时间线样式 */
+        .timeline-container {
+            position: relative;
+            margin: 40px 0;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--neon-blue), var(--neon-pink));
+            box-shadow: var(--glow-blue), var(--glow-pink);
+        }
+
+        .timeline-items {
+            padding-left: 100px;
+        }
+
+        .timeline-item {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-left: 3px solid var(--neon-blue);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 40px;
+            position: relative;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .timeline-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--glow-blue), 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .timeline-date {
+            position: absolute;
+            left: -120px;
+            top: 20px;
+            width: 90px;
+            text-align: right;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--neon-blue);
+            text-shadow: var(--glow-blue);
+        }
+
+        .timeline-time-diff {
+            position: absolute;
+            left: -120px;
+            top: 50px;
+            width: 90px;
+            text-align: right;
+            font-size: 14px;
+            color: var(--neon-pink);
+            text-shadow: var(--glow-pink);
+        }
+
+        .timeline-content h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--neon-purple);
+            text-shadow: var(--glow-purple);
+        }
+
+        .timeline-content p {
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .timeline-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-top: 15px;
+            border: 1px solid rgba(189, 0, 255, 0.3);
+        }
+
+        /* 管理面板样式 */
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 380px;
+            height: 100vh;
+            background: var(--bg-darker);
+            border-left: 1px solid var(--neon-purple);
+            box-shadow: -5px 0 30px rgba(189, 0, 255, 0.3);
+            z-index: 1000;
+            padding: 20px;
+            transition: right 0.4s ease;
+            overflow-y: auto;
+        }
+
+        .admin-panel.active {
+            right: 0;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(189, 0, 255, 0.3);
+        }
+
+        .admin-header h2 {
+            color: var(--neon-purple);
+            text-shadow: var(--glow-purple);
+        }
+
+        .close-admin {
+            background: none;
+            border: none;
+            color: var(--neon-pink);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .admin-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .admin-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .admin-form input,
+        .admin-form textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(20, 20, 40, 0.7);
+            border: 1px solid rgba(189, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .admin-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: var(--glow-purple);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(189, 0, 255, 0.4);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .timeline-line {
+                left: 30px;
+            }
+            
+            .timeline-items {
+                padding-left: 60px;
+            }
+            
+            .timeline-date, 
+            .timeline-time-diff {
+                left: -80px;
+                width: 60px;
+            }
+            
+            .admin-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <div class="logo-text">CYBER TIMELINE</div>
+            </div>
+            <button class="admin-btn" id="adminToggle">
+                <i class="fas fa-terminal"></i> 管理面板
+            </button>
+        </header>
+
+        <main>
+            <div class="timeline-container">
+                <div class="timeline-line"></div>
+                <div class="timeline-items" id="timelineItems">
+                    <!-- 时间线项目将通过JS动态生成 -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 管理面板 -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-header">
+            <h2><i class="fas fa-cogs"></i> 事件管理</h2>
+            <button class="close-admin" id="closeAdmin">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form class="admin-form" id="eventForm">
+            <div class="form-group">
+                <label for="eventTitle">事件标题</label>
+                <input type="text" id="eventTitle" required placeholder="输入事件标题">
+            </div>
+            
+            <div class="form-group">
+                <label for="eventDate">事件日期</label>
+                <input type="datetime-local" id="eventDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="eventType">事件类型</label>
+                <select id="eventType" required>
+                    <option value="">选择事件类型</option>
+                    <option value="system">系统更新</option>
+                    <option value="security">安全事件</option>
+                    <option value="maintenance">维护事件</option>
+                    <option value="achievement">重要成就</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="eventDescription">事件描述</label>
+                <textarea id="eventDescription" required placeholder="详细描述事件内容..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="eventImage">图片URL (可选)</label>
+                <input type="text" id="eventImage" placeholder="https://example.com/image.jpg">
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> 保存事件
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // 模拟事件数据
+        const events = [
+            {
+                id: 1,
+                title: "系统安全协议升级",
+                date: "2023-10-15T14:30:00",
+                type: "security",
+                description: "完成所有核心系统的安全协议升级，增强了防火墙和入侵检测系统。",
+                imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80",
+                timeDiff: "3天前"
+            },
+            {
+                id: 2,
+                title: "量子服务器上线",
+                date: "2023-10-10T09:15:00",
+                type: "system",
+                description: "新的量子计算服务器集群正式上线，处理能力提升200%。",
+                imageUrl: "https://images.unsplash.com/photo-1677442135722-5f1d4d8c3c7d?auto=format&fit=crop&w=600&q=80",
+                timeDiff: "5天前"
+            },
+            {
+                id: 3,
+                title: "神经接口测试成功",
+                date: "2023-10-05T16:45:00",
+                type: "achievement",
+                description: "完成第三代神经接口设备测试，数据传输速率达到5.6Gb/s。",
+                imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80",
+                timeDiff: "10天前"
+            },
+            {
+                id: 4,
+                title: "数据中心维护",
+                date: "2023-09-28T03:00:00",
+                type: "maintenance",
+                description: "完成对主数据中心的硬件维护和冷却系统升级。",
+                imageUrl: "https://images.unsplash.com/photo-1468436139062-f60a71c5c892?auto=format&fit=crop&w=600&q=80",
+                timeDiff: "17天前"
+            }
+        ];
+
+        // DOM 元素
+        const timelineItems = document.getElementById('timelineItems');
+        const adminPanel = document.getElementById('adminPanel');
+        const adminToggle = document.getElementById('adminToggle');
+        const closeAdmin = document.getElementById('closeAdmin');
+        const eventForm = document.getElementById('eventForm');
+
+        // 渲染时间线
+        function renderTimeline() {
+            timelineItems.innerHTML = '';
+            
+            events.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            events.forEach(event => {
+                const eventDate = new Date(event.date);
+                const formattedDate = `${eventDate.getFullYear()}-${(eventDate.getMonth() + 1).toString().padStart(2, '0')}-${eventDate.getDate().toString().padStart(2, '0')}`;
+                const formattedTime = `${eventDate.getHours().toString().padStart(2, '0')}:${eventDate.getMinutes().toString().padStart(2, '0')}`;
+                
+                const eventElement = document.createElement('div');
+                eventElement.className = 'timeline-item';
+                eventElement.innerHTML = `
+                    <div class="timeline-date">
+                        ${formattedDate}<br>
+                        <span style="font-size: 14px; color: #a0a0c0;">${formattedTime}</span>
+                    </div>
+                    <div class="timeline-time-diff">
+                        <i class="fas fa-clock"></i> ${event.timeDiff}
+                    </div>
+                    <div class="timeline-content">
+                        <h3>${event.title}</h3>
+                        <p>${event.description}</p>
+                        ${event.imageUrl ? `<img src="${event.imageUrl}" alt="${event.title}" class="timeline-image">` : ''}
+                    </div>
+                `;
+                
+                timelineItems.appendChild(eventElement);
+            });
+        }
+
+        // 切换管理面板
+        adminToggle.addEventListener('click', () => {
+            adminPanel.classList.add('active');
+        });
+
+        closeAdmin.addEventListener('click', () => {
+            adminPanel.classList.remove('active');
+        });
+
+        // 处理表单提交
+        eventForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('eventTitle').value;
+            const date = document.getElementById('eventDate').value;
+            const type = document.getElementById('eventType').value;
+            const description = document.getElementById('eventDescription').value;
+            const imageUrl = document.getElementById('eventImage').value;
+            
+            // 创建新事件对象
+            const newEvent = {
+                id: events.length + 1,
+                title,
+                date,
+                type,
+                description,
+                imageUrl,
+                timeDiff: "刚刚"
+            };
+            
+            // 添加到事件数组
+            events.unshift(newEvent);
+            
+            // 重新渲染时间线
+            renderTimeline();
+            
+            // 重置表单
+            eventForm.reset();
+            
+            // 关闭管理面板
+            adminPanel.classList.remove('active');
+            
+            // 显示成功消息
+            alert('事件已成功添加!');
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTimeline();
+            
+            // 设置当前时间为默认事件时间
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('eventDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        });
+    </script>
+</body>
+</html>
